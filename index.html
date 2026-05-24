@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beens</title>
+  <link id="siteFavicon" rel="icon" href="https://www.google.com/s2/favicons?domain=google.com&sz=64">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(42, 115, 255, 0.45), transparent 32%),
+        radial-gradient(circle at 80% 85%, rgba(166, 70, 255, 0.42), transparent 36%),
+        linear-gradient(135deg, #010109, #070012 55%, #010109);
+      color: white;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+
+    button, input {
+      font-family: inherit;
+    }
+
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 76px;
+      z-index: 10001;
+      padding: 14px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background:
+        linear-gradient(rgba(8, 8, 24, 0.94), rgba(8, 8, 24, 0.94)) padding-box,
+        linear-gradient(180deg, rgba(65, 135, 255, 0.95), rgba(178, 75, 255, 0.95)) border-box;
+      border-right: 1px solid rgba(130, 160, 255, 0.32);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 0 30px rgba(75, 120, 255, 0.22);
+    }
+
+    .side-stack {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 22px;
+      align-items: center;
+      padding-bottom: 40px;
+    }
+
+    .side-btn,
+    .nav-btn,
+    #newTabBtn {
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      cursor: pointer;
+      color: white;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.18), transparent 35%),
+        rgba(255, 255, 255, 0.07);
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .side-btn {
+      width: 54px;
+      height: 54px;
+      border-radius: 19px;
+      font-size: 22px;
+      text-decoration: none;
+    }
+
+    .side-btn:hover,
+    .nav-btn:hover,
+    #newTabBtn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(150, 105, 255, 0.55);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.28), transparent 35%),
+        rgba(255, 255, 255, 0.12);
+    }
+
+    .side-btn.active {
+      border-color: rgba(185, 120, 255, 0.8);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.32), transparent 35%),
+        linear-gradient(135deg, rgba(40, 120, 255, 0.55), rgba(156, 77, 255, 0.55));
+      box-shadow: 0 0 18px rgba(122, 90, 255, 0.35);
+    }
+
+    #tabbar {
+      position: fixed;
+      top: 0;
+      left: 76px;
+      right: 0;
+      height: 46px;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      background:
+        linear-gradient(rgba(8, 8, 24, 0.94), rgba(8, 8, 24, 0.94)) padding-box,
+        linear-gradient(135deg, rgba(65, 135, 255, 0.65), rgba(178, 75, 255, 0.65)) border-box;
+      border-bottom: 1px solid rgba(130, 160, 255, 0.24);
+      backdrop-filter: blur(18px);
+    }
+
+    #tabList {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      flex: 1;
+      height: 100%;
+    }
+
+    #tabList::-webkit-scrollbar {
+      height: 0;
+    }
+
+    .tab {
+      height: 32px;
+      min-width: 150px;
+      max-width: 250px;
+      border-radius: 13px;
+      padding: 0 8px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.065);
+      color: rgba(255, 255, 255, 0.78);
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .tab.active {
+      color: white;
+      border-color: rgba(150, 105, 255, 0.7);
+      background:
+        radial-gradient(circle at 20% 20%, rgba(90, 150, 255, 0.24), transparent 40%),
+        rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 14px rgba(122, 90, 255, 0.18);
+    }
+
+    .tab img {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      flex: 0 0 auto;
+    }
+
+    .tab-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .tab-close {
+      width: 20px;
+      height: 20px;
+      border: 0;
+      border-radius: 8px;
+      color: white;
+      background: transparent;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .tab-close:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    #newTabBtn {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    #topbar {
+      position: fixed;
+      top: 46px;
+      left: 76px;
+      right: 0;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      z-index: 9999;
+      background:
+        linear-gradient(rgba(8, 8, 24, 0.92), rgba(8, 8, 24, 0.92)) padding-box,
+        linear-gradient(135deg, rgba(65, 135, 255, 0.95), rgba(178, 75, 255, 0.95)) border-box;
+      border-bottom: 1px solid rgba(130, 160, 255, 0.32);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 0 30px rgba(75, 120, 255, 0.25);
+    }
+
+    .nav-btn {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      border-radius: 16px;
+      font-size: 20px;
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #browserUrl {
+      flex: 1;
+      height: 44px;
+      border-radius: 999px;
+      padding: 0 20px;
+      font-size: 15px;
+      min-width: 0;
+      border: 1px solid rgba(110, 160, 255, 0.16);
+      outline: 0;
+      color: white;
+      background:
+        radial-gradient(circle at 15% 50%, rgba(56, 125, 255, 0.16), transparent 36%),
+        rgba(255, 255, 255, 0.08);
+    }
+
+    #browserUrl:focus {
+      border-color: rgba(150, 105, 255, 0.75);
+      background:
+        radial-gradient(circle at 20% 50%, rgba(70, 140, 255, 0.22), transparent 42%),
+        radial-gradient(circle at 80% 50%, rgba(170, 75, 255, 0.2), transparent 38%),
+        rgba(255, 255, 255, 0.1);
+    }
+
+    #viewport {
+      position: fixed;
+      left: 76px;
+      right: 0;
+      top: 114px;
+      bottom: 0;
+      background: #05050b;
+    }
+
+    #mainFrame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: white;
+      display: block;
+    }
+
+    #fullscreenBtn {
+      font-size: 18px;
+    }
+
+    #fullscreenExitBtn {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 10005;
+      width: 46px;
+      height: 46px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 16px;
+      color: white;
+      cursor: pointer;
+      display: none;
+      place-items: center;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.24), transparent 35%),
+        rgba(8, 8, 24, 0.84);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 0 24px rgba(0, 0, 0, 0.32);
+      font-size: 20px;
+    }
+
+    #fullscreenExitBtn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(150, 105, 255, 0.7);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.34), transparent 35%),
+        rgba(255, 255, 255, 0.12);
+    }
+
+    body.fullscreen-mode #sidebar,
+    body.fullscreen-mode #tabbar,
+    body.fullscreen-mode #topbar,
+    body.fullscreen-mode #historyPanel,
+    body.fullscreen-mode #settingsPanel {
+      display: none !important;
+    }
+
+    body.fullscreen-mode #viewport {
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 10004;
+    }
+
+    body.fullscreen-mode #mainFrame {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    body.fullscreen-mode #fullscreenExitBtn {
+      display: grid;
+    }
+
+    #historyPanel,
+    #settingsPanel {
+      position: fixed;
+      top: 126px;
+      left: 90px;
+      width: min(470px, calc(100vw - 112px));
+      max-height: calc(100vh - 146px);
+      z-index: 10002;
+      display: none;
+      overflow: hidden;
+      border-radius: 26px;
+      border: 1px solid rgba(130, 160, 255, 0.34);
+      background:
+        linear-gradient(rgba(8, 8, 24, 0.94), rgba(8, 8, 24, 0.94)) padding-box,
+        linear-gradient(135deg, rgba(65, 135, 255, 0.8), rgba(178, 75, 255, 0.8)) border-box;
+      backdrop-filter: blur(22px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.42), 0 0 30px rgba(75, 120, 255, 0.18);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 16px 10px;
+      gap: 10px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .panel-mini {
+      width: 34px;
+      height: 34px;
+      border-radius: 13px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.07);
+      color: white;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .panel-body {
+      padding: 0 16px 16px;
+      overflow: auto;
+      max-height: calc(100vh - 210px);
+    }
+
+    #historySearch,
+    .setting-input {
+      width: 100%;
+      height: 42px;
+      border-radius: 16px;
+      border: 1px solid rgba(110, 160, 255, 0.16);
+      outline: 0;
+      color: white;
+      padding: 0 14px;
+      background: rgba(255, 255, 255, 0.07);
+      margin-bottom: 10px;
+    }
+
+    .setting-input[type="color"] {
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    .setting-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 42px;
+      margin-bottom: 10px;
+      padding: 0 12px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(110, 160, 255, 0.16);
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .setting-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.58);
+      margin: 10px 0 6px;
+      font-weight: 800;
+    }
+
+    .setting-preview {
+      margin: 12px 0;
+      padding: 12px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .setting-preview img {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+    }
+
+    .setting-preview-title {
+      font-weight: 900;
+    }
+
+    .setting-preview-url {
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 12px;
+    }
+
+    .setting-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .setting-save {
+      flex: 1;
+      height: 42px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 16px;
+      color: white;
+      cursor: pointer;
+      background: linear-gradient(135deg, #2878ff, #9c4dff);
+      font-weight: 900;
+    }
+
+    .setting-reset {
+      width: 110px;
+      height: 42px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 16px;
+      color: white;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.07);
+      font-weight: 900;
+    }
+
+    #historyList {
+      max-height: calc(100vh - 256px);
+      overflow: auto;
+      padding-bottom: 12px;
+    }
+
+    .history-item {
+      width: 100%;
+      text-align: left;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 12px;
+      margin: 8px 0;
+      cursor: pointer;
+      color: white;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(70, 140, 255, 0.12), transparent 38%),
+        rgba(255, 255, 255, 0.055);
+    }
+
+    .history-item:hover {
+      border-color: rgba(150, 105, 255, 0.42);
+      background:
+        radial-gradient(circle at 10% 20%, rgba(70, 140, 255, 0.18), transparent 38%),
+        rgba(255, 255, 255, 0.08);
+    }
+
+    .history-name {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-weight: 800;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .history-url {
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-time {
+      color: rgba(255, 255, 255, 0.38);
+      font-size: 11px;
+      margin-top: 6px;
+    }
+
+    @media (max-width: 700px) {
+      #sidebar {
+        width: 58px;
+        padding: 10px 6px;
+      }
+
+      .side-btn {
+        width: 46px;
+        height: 46px;
+        border-radius: 17px;
+      }
+
+      .side-stack {
+        gap: 16px;
+        padding-bottom: 34px;
+      }
+
+      #tabbar {
+        left: 58px;
+        height: 42px;
+      }
+
+      #topbar {
+        top: 42px;
+        left: 58px;
+        height: 58px;
+        gap: 6px;
+        padding: 8px;
+      }
+
+      .nav-btn {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        font-size: 17px;
+        border-radius: 13px;
+      }
+
+      #browserUrl {
+        height: 36px;
+        font-size: 13px;
+        padding: 0 12px;
+      }
+
+      #viewport {
+        left: 58px;
+        top: 100px;
+      }
+
+      #historyPanel,
+      #settingsPanel {
+        top: 110px;
+        left: 66px;
+        width: calc(100vw - 76px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside id="sidebar">
+    <div class="side-stack">
+      <button class="side-btn" id="gamesBtn" title="Games"><i class="bi bi-controller"></i></button>
+      <button class="side-btn active" id="proxyHomeBtn" title="Proxy Search"><i class="bi bi-search"></i></button>
+      <button class="side-btn" id="chatBtn" title="Chat"><i class="bi bi-chat-dots"></i></button>
+      <button class="side-btn" id="historyBtn" title="History"><i class="bi bi-book"></i></button>
+      <button class="side-btn" id="settingsBtn" title="Settings"><i class="bi bi-gear"></i></button>
+    </div>
+  </aside>
+
+  <div id="historyPanel">
+    <div class="panel-head">
+      <div class="panel-title"><i class="bi bi-book"></i><span>History</span></div>
+      <div class="panel-actions">
+        <button class="panel-mini" id="clearHistoryBtn" title="Clear"><i class="bi bi-trash"></i></button>
+        <button class="panel-mini" id="closeHistoryBtn" title="Close"><i class="bi bi-x-lg"></i></button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <input id="historySearch" placeholder="Search history" autocomplete="off" />
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <div id="settingsPanel">
+    <div class="panel-head">
+      <div class="panel-title"><i class="bi bi-gear"></i><span>Settings</span></div>
+      <div class="panel-actions">
+        <button class="panel-mini" id="closeSettingsBtn" title="Close"><i class="bi bi-x-lg"></i></button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="setting-label">Disguise website</div>
+      <input class="setting-input" id="disguiseUrl" placeholder="clever.com" autocomplete="off" />
+      <div class="setting-label">Tab name</div>
+      <input class="setting-input" id="disguiseName" placeholder="Clever" autocomplete="off" />
+      <div class="setting-preview">
+        <img id="disguisePreviewIcon" src="https://www.google.com/s2/favicons?domain=google.com&sz=64">
+        <div>
+          <div class="setting-preview-title" id="disguisePreviewName">Beens</div>
+          <div class="setting-preview-url" id="disguisePreviewUrl">google.com</div>
+        </div>
+      </div>
+
+      <div class="setting-label">Chat username color</div>
+      <input class="setting-input" id="chatNameColor" type="color" value="#8db6ff" />
+
+      <label class="setting-check">
+        <input id="chatRainbowName" type="checkbox">
+        Rainbow username
+      </label>
+
+      <div class="setting-row">
+        <button class="setting-save" id="saveDisguiseBtn">Save</button>
+        <button class="setting-reset" id="resetDisguiseBtn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tabbar">
+    <div id="tabList"></div>
+    <button id="newTabBtn"><i class="bi bi-plus-lg"></i></button>
+  </div>
+
+  <div id="topbar">
+    <button class="nav-btn" id="backBtn">‹</button>
+    <button class="nav-btn" id="forwardBtn">›</button>
+    <button class="nav-btn" id="reloadBtn">⟳</button>
+    <button class="nav-btn" id="homeBtn">⌂</button>
+    <button class="nav-btn" id="topSearchBtn"><i class="bi bi-search"></i></button>
+    <input id="browserUrl" autocomplete="off" spellcheck="false" placeholder="Search or enter a website" list="siteSuggestions" />
+    <button class="nav-btn" id="goUrlBtn">↵</button>
+    <button class="nav-btn" id="fullscreenBtn" title="Fullscreen"><i class="bi bi-fullscreen"></i></button>
+  </div>
+
+  <div id="viewport">
+    <iframe id="mainFrame" src="/pr.html"></iframe>
+    <button id="fullscreenExitBtn" title="Exit Fullscreen"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <datalist id="siteSuggestions"></datalist>
+
+  <script src="/baremux/index.js"></script>
+  <script src="/scram/scramjet.all.js"></script>
+  <script>
+    const mainFrame = document.getElementById("mainFrame");
+    const browserUrl = document.getElementById("browserUrl");
+    const backBtn = document.getElementById("backBtn");
+    const forwardBtn = document.getElementById("forwardBtn");
+    const reloadBtn = document.getElementById("reloadBtn");
+    const homeBtn = document.getElementById("homeBtn");
+    const topSearchBtn = document.getElementById("topSearchBtn");
+    const goUrlBtn = document.getElementById("goUrlBtn");
+    const gamesBtn = document.getElementById("gamesBtn");
+    const proxyHomeBtn = document.getElementById("proxyHomeBtn");
+    const chatBtn = document.getElementById("chatBtn");
+    const historyBtn = document.getElementById("historyBtn");
+    const settingsBtn = document.getElementById("settingsBtn");
+    const historyPanel = document.getElementById("historyPanel");
+    const settingsPanel = document.getElementById("settingsPanel");
+    const closeHistoryBtn = document.getElementById("closeHistoryBtn");
+    const closeSettingsBtn = document.getElementById("closeSettingsBtn");
+    const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+    const historyList = document.getElementById("historyList");
+    const historySearch = document.getElementById("historySearch");
+    const siteSuggestions = document.getElementById("siteSuggestions");
+    const tabList = document.getElementById("tabList");
+    const newTabBtn = document.getElementById("newTabBtn");
+    const siteFavicon = document.getElementById("siteFavicon");
+    const disguiseUrl = document.getElementById("disguiseUrl");
+    const disguiseName = document.getElementById("disguiseName");
+    const disguisePreviewIcon = document.getElementById("disguisePreviewIcon");
+    const disguisePreviewName = document.getElementById("disguisePreviewName");
+    const disguisePreviewUrl = document.getElementById("disguisePreviewUrl");
+    const saveDisguiseBtn = document.getElementById("saveDisguiseBtn");
+    const resetDisguiseBtn = document.getElementById("resetDisguiseBtn");
+    const chatNameColor = document.getElementById("chatNameColor");
+    const chatRainbowName = document.getElementById("chatRainbowName");
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    const fullscreenExitBtn = document.getElementById("fullscreenExitBtn");
+
+    const TAB_KEY = "proxyTabs";
+    const ACTIVE_TAB_KEY = "activeProxyTab";
+    const HISTORY_KEY = "proxyHistory";
+    const DISGUISE_KEY = "siteDisguise";
+
+    let scramjet = null;
+    let connection = null;
+    let ready = null;
+    let allHistory = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+
+    function makeId() {
+      return "tab_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+    }
+
+    function domainFromInput(value) {
+      const raw = value.trim();
+      if (!raw) return "google.com";
+
+      try {
+        return new URL(raw).hostname;
+      } catch {}
+
+      try {
+        return new URL("https://" + raw).hostname;
+      } catch {}
+
+      return raw.replace(/^https?:\/\//, "").split("/")[0] || "google.com";
+    }
+
+    function cleanNameFromDomain(domain) {
+      return domain
+        .replace(/^www\./, "")
+        .split(".")[0]
+        .replace(/(^|\s)\S/g, letter => letter.toUpperCase());
+    }
+
+    function faviconForDomain(domain) {
+      return "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(domain) + "&sz=64";
+    }
+
+    function applyDisguise() {
+      const saved = JSON.parse(localStorage.getItem(DISGUISE_KEY) || "{}");
+      const domain = saved.domain || "google.com";
+      const name = saved.name || "Beens";
+      const icon = faviconForDomain(domain);
+
+      document.title = name;
+      siteFavicon.href = icon;
+      disguiseUrl.value = domain;
+      disguiseName.value = name;
+      disguisePreviewIcon.src = icon;
+      disguisePreviewName.textContent = name;
+      disguisePreviewUrl.textContent = domain;
+      chatNameColor.value = localStorage.getItem("chatNameColor") || "#8db6ff";
+      chatRainbowName.checked = localStorage.getItem("chatRainbowName") === "true";
+    }
+
+    function updateDisguisePreview() {
+      const domain = domainFromInput(disguiseUrl.value);
+      const name = disguiseName.value.trim() || cleanNameFromDomain(domain);
+      const icon = faviconForDomain(domain);
+
+      disguisePreviewIcon.src = icon;
+      disguisePreviewName.textContent = name;
+      disguisePreviewUrl.textContent = domain;
+    }
+
+    function saveDisguise() {
+      const domain = domainFromInput(disguiseUrl.value);
+      const name = disguiseName.value.trim() || cleanNameFromDomain(domain);
+
+      localStorage.setItem(DISGUISE_KEY, JSON.stringify({ domain, name }));
+      applyDisguise();
+    }
+
+    function resetDisguise() {
+      localStorage.removeItem(DISGUISE_KEY);
+      applyDisguise();
+    }
+
+    function displayName(url) {
+      if (url === "/pr.html") return "Proxy Home";
+      if (url === "/gm.html") return "Games";
+      if (url === "/ch.html") return "Chat";
+
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname.includes("duckduckgo.com")) {
+          return "Search: " + (parsed.searchParams.get("q") || parsed.hostname);
+        }
+        return parsed.hostname.replace(/^www\./, "");
+      } catch {
+        return url;
+      }
+    }
+
+    function iconUrlForPage(url) {
+      if (url === "/pr.html") return "https://www.google.com/s2/favicons?domain=google.com&sz=64";
+      if (url === "/gm.html") return "https://www.google.com/s2/favicons?domain=roblox.com&sz=64";
+      if (url === "/ch.html") return "https://www.google.com/s2/favicons?domain=discord.com&sz=64";
+
+      try {
+        return faviconForDomain(new URL(url).hostname);
+      } catch {
+        return "https://www.google.com/s2/favicons?domain=google.com&sz=64";
+      }
+    }
+
+    function makeTab(url = "/pr.html") {
+      return {
+        id: makeId(),
+        url,
+        title: displayName(url),
+        history: [url],
+        index: 0
+      };
+    }
+
+    let tabs = JSON.parse(localStorage.getItem(TAB_KEY) || "[]");
+
+    if (!Array.isArray(tabs) || !tabs.length) {
+      tabs = [makeTab("/pr.html")];
+    }
+
+    let activeTabId = localStorage.getItem(ACTIVE_TAB_KEY);
+
+    if (!tabs.some(tab => tab.id === activeTabId)) {
+      activeTabId = tabs[0].id;
+    }
+
+    function initScramjet() {
+      if (ready) return ready;
+
+      ready = (async () => {
+        const { ScramjetController } = $scramjetLoadController();
+
+        scramjet = new ScramjetController({
+          prefix: "/scram/service/",
+          files: {
+            wasm: "/scram/scramjet.wasm.wasm",
+            all: "/scram/scramjet.all.js",
+            sync: "/scram/scramjet.sync.js"
+          }
+        });
+
+        connection = new BareMux.BareMuxConnection("/baremux/worker.js");
+
+        await scramjet.init();
+
+        const wispUrl = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/wisp/`;
+
+        await connection.setTransport("/libcurl/index.mjs", [
+          {
+            websocket: wispUrl
+          }
+        ]);
+
+        await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+        await navigator.serviceWorker.ready;
+      })();
+
+      return ready;
+    }
+
+    function activeTab() {
+      return tabs.find(tab => tab.id === activeTabId) || tabs[0];
+    }
+
+    function saveTabs() {
+      localStorage.setItem(TAB_KEY, JSON.stringify(tabs));
+      localStorage.setItem(ACTIVE_TAB_KEY, activeTabId);
+    }
+
+    function normalizeInput(value) {
+      const raw = value.trim();
+      if (!raw) return null;
+
+      if (raw === "/pr.html" || raw === "pr.html") return "/pr.html";
+      if (raw === "/gm.html" || raw === "gm.html") return "/gm.html";
+      if (raw === "/ch.html" || raw === "ch.html") return "/ch.html";
+
+      try {
+        return new URL(raw).toString();
+      } catch {}
+
+      try {
+        const url = new URL("https://" + raw);
+        if (url.hostname.includes(".")) return url.toString();
+      } catch {}
+
+      return "https://duckduckgo.com/?ia=web&origin=funnel_home_bing&t=h_&q=" + encodeURIComponent(raw) + "&chip-select=search";
+    }
+
+    function isLocalPage(url) {
+      return url === "/pr.html" || url === "/gm.html" || url === "/ch.html";
+    }
+
+    function iconForUrl(url) {
+      if (url === "/pr.html") return "bi-search";
+      if (url === "/gm.html") return "bi-controller";
+      if (url === "/ch.html") return "bi-chat-dots";
+
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname.includes("duckduckgo.com")) return "bi-search";
+        return "bi-globe2";
+      } catch {
+        return "bi-globe2";
+      }
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"']/g, char => {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;"
+        }[char];
+      });
+    }
+
+    function saveHistory(url) {
+      const item = {
+        url,
+        title: displayName(url),
+        time: Date.now()
+      };
+
+      allHistory = allHistory.filter(entry => entry.url !== url);
+      allHistory.unshift(item);
+      allHistory = allHistory.slice(0, 200);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(allHistory));
+      renderHistory();
+      renderSuggestions();
+    }
+
+    function renderSuggestions() {
+      siteSuggestions.innerHTML = "";
+
+      for (const item of allHistory) {
+        const option = document.createElement("option");
+        option.value = item.url;
+        option.label = item.title;
+        siteSuggestions.appendChild(option);
+      }
+    }
+
+    function renderHistory() {
+      const query = historySearch.value.trim().toLowerCase();
+
+      const items = allHistory.filter(item => {
+        return !query || item.url.toLowerCase().includes(query) || item.title.toLowerCase().includes(query);
+      });
+
+      historyList.innerHTML = "";
+
+      if (!items.length) {
+        historyList.innerHTML = '<div class="history-item"><div class="history-name"><i class="bi bi-clock-history"></i><span>No history yet</span></div><div class="history-url">Visited sites will show here.</div></div>';
+        return;
+      }
+
+      for (const item of items) {
+        const button = document.createElement("button");
+        button.className = "history-item";
+        button.innerHTML = `
+          <div class="history-name"><i class="bi ${iconForUrl(item.url)}"></i><span>${escapeHtml(item.title)}</span></div>
+          <div class="history-url">${escapeHtml(item.url)}</div>
+          <div class="history-time">${escapeHtml(new Date(item.time).toLocaleString())}</div>
+        `;
+        button.addEventListener("click", () => {
+          historyPanel.style.display = "none";
+          settingsPanel.style.display = "none";
+          openUrl(item.url);
+        });
+        historyList.appendChild(button);
+      }
+    }
+
+    function renderTabs() {
+      tabList.innerHTML = "";
+
+      for (const tab of tabs) {
+        const el = document.createElement("div");
+        el.className = "tab" + (tab.id === activeTabId ? " active" : "");
+        el.innerHTML = `
+          <img src="${escapeHtml(iconUrlForPage(tab.url))}" alt="">
+          <span class="tab-title">${escapeHtml(tab.title)}</span>
+          <button class="tab-close">×</button>
+        `;
+
+        el.addEventListener("click", event => {
+          if (event.target.classList.contains("tab-close")) return;
+          activeTabId = tab.id;
+          saveTabs();
+          loadActiveTab();
+        });
+
+        el.querySelector(".tab-close").addEventListener("click", event => {
+          event.stopPropagation();
+          closeTab(tab.id);
+        });
+
+        tabList.appendChild(el);
+      }
+    }
+
+    function closeTab(id) {
+      if (tabs.length === 1) {
+        tabs = [makeTab("/pr.html")];
+        activeTabId = tabs[0].id;
+      } else {
+        const index = tabs.findIndex(tab => tab.id === id);
+        tabs = tabs.filter(tab => tab.id !== id);
+
+        if (activeTabId === id) {
+          activeTabId = tabs[Math.max(0, index - 1)].id;
+        }
+      }
+
+      saveTabs();
+      loadActiveTab();
+    }
+
+    function newTab(url = "/pr.html") {
+      const tab = makeTab(url);
+      tabs.push(tab);
+      activeTabId = tab.id;
+      saveTabs();
+      loadActiveTab();
+    }
+
+    function updateButtons() {
+      const tab = activeTab();
+      backBtn.disabled = tab.index <= 0;
+      forwardBtn.disabled = tab.index >= tab.history.length - 1;
+      reloadBtn.disabled = !tab.url;
+    }
+
+    function setActiveSidebar(url) {
+      gamesBtn.classList.toggle("active", url === "/gm.html");
+      proxyHomeBtn.classList.toggle("active", url === "/pr.html");
+      chatBtn.classList.toggle("active", url === "/ch.html");
+      historyBtn.classList.toggle("active", historyPanel.style.display === "block");
+      settingsBtn.classList.toggle("active", settingsPanel.style.display === "block");
+    }
+
+    async function loadActiveTab() {
+      const tab = activeTab();
+      browserUrl.value = tab.url;
+      tab.title = displayName(tab.url);
+      renderTabs();
+      updateButtons();
+      setActiveSidebar(tab.url);
+      saveTabs();
+
+      if (isLocalPage(tab.url)) {
+        mainFrame.src = tab.url;
+        return;
+      }
+
+      try {
+        await initScramjet();
+        mainFrame.src = scramjet.encodeUrl(tab.url);
+      } catch (error) {
+        console.error(error);
+        alert(error.message || String(error));
+      }
+    }
+
+    function setFrameUrl(url, addHistory) {
+      const tab = activeTab();
+
+      tab.url = url;
+      tab.title = displayName(url);
+      browserUrl.value = url;
+
+      if (addHistory) {
+        tab.history = tab.history.slice(0, tab.index + 1);
+        tab.history.push(url);
+        tab.index = tab.history.length - 1;
+        saveHistory(url);
+      }
+
+      saveTabs();
+      loadActiveTab();
+    }
+
+    function openUrl(value, addHistory = true) {
+      const target = normalizeInput(value);
+      if (!target) return;
+      setFrameUrl(target, addHistory);
+    }
+
+    function backFrame() {
+      const tab = activeTab();
+      if (tab.index <= 0) return;
+      tab.index -= 1;
+      tab.url = tab.history[tab.index];
+      saveTabs();
+      loadActiveTab();
+    }
+
+    function forwardFrame() {
+      const tab = activeTab();
+      if (tab.index >= tab.history.length - 1) return;
+      tab.index += 1;
+      tab.url = tab.history[tab.index];
+      saveTabs();
+      loadActiveTab();
+    }
+
+    function reloadFrame() {
+      loadActiveTab();
+    }
+
+    function goProxyHome() {
+      openUrl("/pr.html");
+    }
+
+    function goGames() {
+      openUrl("/gm.html");
+    }
+
+    function goChat() {
+      openUrl("/ch.html");
+    }
+
+    async function enterFullscreenMode() {
+      historyPanel.style.display = "none";
+      settingsPanel.style.display = "none";
+      document.body.classList.add("fullscreen-mode");
+
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function exitFullscreenMode() {
+      document.body.classList.remove("fullscreen-mode");
+
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function syncFullscreenMode() {
+      if (document.fullscreenElement) {
+        document.body.classList.add("fullscreen-mode");
+      } else {
+        document.body.classList.remove("fullscreen-mode");
+      }
+    }
+
+    goUrlBtn.addEventListener("click", () => openUrl(browserUrl.value));
+
+    browserUrl.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        openUrl(browserUrl.value);
+      }
+    });
+
+    backBtn.addEventListener("click", backFrame);
+    forwardBtn.addEventListener("click", forwardFrame);
+    reloadBtn.addEventListener("click", reloadFrame);
+    homeBtn.addEventListener("click", goProxyHome);
+    topSearchBtn.addEventListener("click", goProxyHome);
+    proxyHomeBtn.addEventListener("click", goProxyHome);
+    gamesBtn.addEventListener("click", goGames);
+    chatBtn.addEventListener("click", goChat);
+    newTabBtn.addEventListener("click", () => newTab("/pr.html"));
+    fullscreenBtn.addEventListener("click", enterFullscreenMode);
+    fullscreenExitBtn.addEventListener("click", exitFullscreenMode);
+    document.addEventListener("fullscreenchange", syncFullscreenMode);
+
+    historyBtn.addEventListener("click", () => {
+      settingsPanel.style.display = "none";
+      historyPanel.style.display = historyPanel.style.display === "block" ? "none" : "block";
+      renderHistory();
+      setActiveSidebar(activeTab().url);
+    });
+
+    settingsBtn.addEventListener("click", () => {
+      historyPanel.style.display = "none";
+      settingsPanel.style.display = settingsPanel.style.display === "block" ? "none" : "block";
+      setActiveSidebar(activeTab().url);
+    });
+
+    closeHistoryBtn.addEventListener("click", () => {
+      historyPanel.style.display = "none";
+      setActiveSidebar(activeTab().url);
+    });
+
+    closeSettingsBtn.addEventListener("click", () => {
+      settingsPanel.style.display = "none";
+      setActiveSidebar(activeTab().url);
+    });
+
+    clearHistoryBtn.addEventListener("click", () => {
+      allHistory = [];
+      localStorage.setItem(HISTORY_KEY, "[]");
+      renderHistory();
+      renderSuggestions();
+    });
+
+    historySearch.addEventListener("input", renderHistory);
+    disguiseUrl.addEventListener("input", updateDisguisePreview);
+    disguiseName.addEventListener("input", updateDisguisePreview);
+    saveDisguiseBtn.addEventListener("click", saveDisguise);
+    resetDisguiseBtn.addEventListener("click", resetDisguise);
+
+    chatNameColor.addEventListener("input", () => {
+      localStorage.setItem("chatNameColor", chatNameColor.value);
+    });
+
+    chatRainbowName.addEventListener("change", () => {
+      localStorage.setItem("chatRainbowName", chatRainbowName.checked ? "true" : "false");
+    });
+
+    document.addEventListener("click", event => {
+      if (!historyPanel.contains(event.target) && !historyBtn.contains(event.target)) {
+        historyPanel.style.display = "none";
+      }
+
+      if (!settingsPanel.contains(event.target) && !settingsBtn.contains(event.target)) {
+        settingsPanel.style.display = "none";
+      }
+
+      setActiveSidebar(activeTab().url);
+    });
+
+    window.addEventListener("message", event => {
+      if (!event.data || event.data.type !== "open-url") return;
+      openUrl(event.data.value);
+    });
+
+    applyDisguise();
+    renderHistory();
+    renderSuggestions();
+    renderTabs();
+    loadActiveTab();
+  </script>
+</body>
+</html>
